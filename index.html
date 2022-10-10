@@ -1,132 +1,257 @@
-
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
-  <title>Animation</title>
-  <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
-  <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
-  <py-script src="/pyscipt.py"></py-script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Gugi&display=swap');
-    #footerbox{
-      width:100% ;
-      height:120px ;
-      background-color:#acacac;
-      margin: 0;
-    }
-    #head{
-      width:100% ;
-      height:120px ;
-      background: linear-gradient(45deg, Violet, Orange);;
-      margin: 0;
-      }
-    #youtudeplaylist{
-      border: 1px solid black;
-    }
-    .newsfun:hover{
-      animation: rotat 1.5s infinite, infinite alternate;
-    }
-    .newsfn:hover{
-      animation: rott 1.5s infinite, infinite alternate;
-    }
-    #ddddd{
-      margin: 5px ;
-      position: relative;
-      display: inline-block;
-    }
-    #ffffff{
-      margin: 5px ;
-      position: relative;
-      display: inline-block;
-    }
-    .newsfn{
-      width:350px ;
-      height:70px ;
-      background-color:#acacac;
-      opacity: 0 ;
-      margin: ;
-      position: absolute;
-      top: 130px;
-      left: 0;
-      
-    }
-    @keyframes rott {
-      from {opacity:0 ;}
-      to {opacity:0.3 ;}
-    }
-    .newsfun{
-      width:350px ;
-      height:70px ;
-      background-color:#acacac;
-      opacity:0 ;
-      margin: ;
-      position: absolute;
-      top: 130px;
-      left: 0;
-      
-    }
-    @keyframes rotat {
-      from {opacity:0 ;}
-      to {opacity:0.3 ;}
-    }
-    h1{
-      margin-top: 0;
-    }
-    .logo{
-      height:25px ;
-    }
-    .high{
-      font-family: 'Gugi', cursive;
-    }
-    .box {
-      width: 100px;
-      height: 50px;
-      float: left;     
-      animation: rotate 1.5s infinite, background 1.5s infinite alternate;
-    }
-    
-    @keyframes rotate {
-      from { transform: perspective(120px) rotateX(0deg) rotateY(0deg); }
-      50% { transform: perspective(120px) rotateX(-180deg) rotateY(0deg); }
-      to { transform: perspective(120px) rotateX(-180deg) rotateY(-180deg); }
-    }
+  <base target="_top">
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css" />
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <title>Animation</title>
+    <script>
+        $(function() {
+          var data = [
+              "LG전자",
+              "LG전자우"
+            ];
 
-    @keyframes background { 
-      from { background-color: red; }
-      50% { background-color: green }
-      to { background-color: blue; }
-    }
-    
-  </style>
+            $( "#stockName3" ).autocomplete({
+              source: data
+            });
+
+        var jsonData = [ 
+            {"value":"066570","label":"LG전자","price":"92,900"},
+            {"value":"066575","label":"LG전자우","price":"45,100"}
+        ];
+
+       $("#stockName2").autocomplete({
+          source: jsonData,
+          select: function( event, ui ) {
+            $(this).val(ui.item.label);
+            $("#stockCode2").val(ui.item.value);
+            $("#stockPrice2").html(ui.item.price);
+            return false;
+          },
+          focus : function(event, ui) {  return false; }     
+        });
+
+      
+            
+      var searchRequest = null;
+
+      $("#stockName").autocomplete({
+          
+          source: function( request, response ) {
+            
+           // 이전 요청 초기화 
+		   if(searchRequest != null ) searchRequest.abort(); 
+           
+           // jquery의 $.ajax 명령
+            searchRequest = $.ajax({
+              url: "https://www.sedaily.com/Stock/Quote/JsonSearchData",  
+              type: "get", 
+              data: { text: $("#stockName").val() },
+              success: function(data)
+              {
+                var obj = data["Items"].map(function(v){
+                    return { 
+                      label : v.StockName +"(" + v.StockCode +")", 
+                      value : v.StockCode, 
+                      price : v.CurrentPrice,
+                      market : (v.Market==1)?"코스피":"코스닥",
+                      changes : (v.PreRate.indexOf('-')>0)? -v.PreGap:v.PreGap,
+                      changepct : v.PreRate,
+                      stockTime : v.StockTime,
+					  IndustryCode : v.IndustryCode
+                    }
+                });
+                response(obj);
+              },
+              dataType: "json",
+            });
+           
+          },
+          select: function( event, ui ) { 
+            // 항목을 선택하면 HTML 페이지에 전달/표시 
+            $(this).val(ui.item.label);
+            $("#stockCode").val(ui.item.value);
+            $("#stockPrice").html(ui.item.price);
+            $("#market").html(ui.item.market);
+            $("#changes").html(ui.item.changes);
+            $("#changepct").html(ui.item.changepct);
+            $("#stockTime").html(ui.item.stockTime);
+
+            return false;
+          },
+          focus : function(event, ui) { 
+              return false;
+          },     
+          autoFocus: true, 
+          minLength: 2 // 최소 글자수
+        });
+        });
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gugi&display=swap');
+
+        #footerbox {
+            width: 100%;
+            height: 120px;
+            background-color: #acacac;
+            margin: 0;
+        }
+
+        #head {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(45deg, Violet, Orange);
+            ;
+            margin: 0;
+        }
+
+        #ddddd {
+            margin: 5px;
+            position: relative;
+            display: inline-block;
+        }
+
+        #ffffff {
+            margin: 5px;
+            position: relative;
+            display: inline-block;
+        }
+
+        @keyframes rott {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes rotat {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 0.3;
+            }
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .logo {
+            height: 25px;
+        }
+
+        .high {
+            font-family: 'Gugi', cursive;
+        }
+
+        .box {
+            width: 100px;
+            height: 50px;
+            float: left;
+            animation: rotate 1.5s infinite, background 1.5s infinite alternate;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+            }
+
+            50% {
+                transform: perspective(120px) rotateX(-180deg) rotateY(0deg);
+            }
+
+            to {
+                transform: perspective(120px) rotateX(-180deg) rotateY(-180deg);
+            }
+        }
+
+        @keyframes background {
+            from {
+                background-color: red;
+            }
+
+            50% {
+                background-color: green
+            }
+
+            to {
+                background-color: blue;
+            }
+        }
+      #id{
+        width:10% ;
+      }
+      #pw{
+        width:11% ;
+      }
+    </style>
 </head>
 
 <body>
-  <div id="head">
-    <div class="logo"></div>
-      <div class="box2">
-      <div class="box"><p class="high">더 넗게</p></div>
-      <h1>hi tv</h1>
-  </div>
-    </div> 
-</div>
-<div>
-  <div id="youtudeplaylist">
-    <div id="ddddd">
-      <iframe id="ddd" width="350" height="200" src="https://www.youtube-nocookie.com/embed/-Lt3ro5QSG8?controls=0?rel=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      <div class="newsfun"><p>재생시간:4:1</p></div>
-    </div>
-    <div id="ffffff">
-      <iframe id="fff" width="350" height="200" src="https://www.youtube-nocookie.com/embed/2Edc1dfguhs?controls=0?rel=0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      <div class="newsfn"><p>재생시간:55:25</p></div>
-    </div>
-  </div>
-</div>
-<div id=footer>
-  <div id="footerbox">
-    <p>copyringt 복지훈, 도용하는 경우가 발생함.</p>
-  </div>
+    <div id="head">
+      <div>
+        <div class="logo"></div>
+        <div class="box2"></div>
+        <div class="box"></div>
+        <h1>hi tv</h1>
+        <form method="post" action="phpinfo.php">
+          <input type="text" name="id" id="id" placeholder="아이디">
+          <input type="password" name="password" id="pw" placeholder="비번">
+          <input type="submit" value="전송">
+        </form>
+      </div>
 
 
+        </form>
+    </div>
+    </div>
+    <div>
+      <table width="400" height="100%">
+        <tr>
+          <th > 종목명</th>
+          <td>
+            <input type="text" name="stockName" id="stockName" width="100%"> 
+          </td>
+        </tr>
+        <tr>
+          <th>종목코드</th>
+          <td>
+            <input type="text" name="stockCode" id="stockCode" value="" size=6 />
+          </td>
+        </tr>
+        <tr>
+          <th>주가정보</th>
+          <td>
+                <div>시장:   :<span id ="market"></span></div>
+                <div>주가    :<span id ="stockPrice"></span></div>
+                <div>전일비 :<span id ="changes"></span></div>
+                <div>등락률 :<span id ="changepct"></span></div>
+                <div>시간 : <span id ="stockTime"></span></div>
+          </td>
+        </tr>
+        </table>
+      <iframe width="50%" height="200" src="https://forecast.io/embed/#lat=37.5662&lon=126.9785&name=서울시&color=&font=arial&units=si" frameborder="0"></iframe>
+    
+      </form>
+      
+    </div>
+    <div>
+
+    </div>
+    <div id=footer>
+        <div id="footerbox">
+            <p>copyringt 복지훈, 도용하는 경우가 발생함.</p>
+        </div>
 </body>
+
 </html>
